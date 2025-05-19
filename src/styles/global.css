@@ -5,17 +5,83 @@
  */
 
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
+	--accent: 136, 58, 234;
+	--accent-light: 224, 204, 250;
+	--accent-dark: 49, 10, 101;
+	--accent-gradient: linear-gradient(
+		45deg,
+		rgb(var(--accent)),
+		rgb(var(--accent-light)) 30%,
+		white 60%
+	);
+
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
 	--gray-light: 229, 233, 240;
 	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
-	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
-		0 16px 32px rgba(var(--gray), 33%);
+	--gray-gradient: linear-gradient(
+		180deg,
+		rgb(var(--gray-light)) 0%,
+		white 100%
+	);
+	--box-shadow: 0 2px 6px rgba(var(--gray), 25%),
+		0 8px 24px rgba(var(--gray), 33%);
+	
+	--font-size-base: 1rem;
+	--font-size-lg: 1.125rem;
+	--font-size-xl: 1.25rem;
+	--font-size-2xl: 1.5rem;
+	--font-size-3xl: 1.875rem;
+	--font-size-4xl: 2.25rem;
+	
+	--content-width: 60ch;
+	--content-max-width: 1200px;
+	--transition-standard: all 0.3s ease;
 }
+
+/* 暗黑模式配色 */
+html[data-theme="dark"] {
+	--accent: 136, 58, 234;
+	--accent-light: 224, 204, 250;
+	--accent-dark: 49, 10, 101;
+	--accent-gradient: linear-gradient(
+		45deg,
+		rgb(var(--accent)),
+		rgb(var(--accent-light)) 30%,
+		rgb(30, 30, 30) 60%
+	);
+
+	--black: 255, 255, 255;
+	--gray: 180, 190, 210;
+	--gray-light: 36, 40, 50;
+	--gray-dark: 220, 225, 235;
+	--gray-gradient: linear-gradient(
+		180deg,
+		rgb(var(--gray-light)) 0%,
+		rgb(25, 25, 25) 100%
+	);
+	--box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5),
+		0 8px 24px rgba(0, 0, 0, 0.6);
+	
+	background-color: rgb(18, 18, 18);
+	color: rgb(var(--gray-dark));
+}
+
+html[data-theme="dark"] header,
+html[data-theme="dark"] footer {
+	background-color: rgb(24, 24, 27);
+}
+
+html[data-theme="dark"] a {
+	color: rgb(var(--accent-light));
+}
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .project-card {
+	background-color: rgb(32, 32, 36);
+	border-color: rgb(45, 45, 50);
+}
+
 @font-face {
 	font-family: 'Atkinson';
 	src: url('/fonts/atkinson-regular.woff') format('woff');
@@ -79,10 +145,10 @@ b {
 	font-weight: 700;
 }
 a {
-	color: var(--accent);
+	color: rgb(var(--accent));
 }
 a:hover {
-	color: var(--accent);
+	color: rgb(var(--accent));
 }
 p {
 	margin-bottom: 1em;
@@ -118,7 +184,7 @@ pre > code {
 	all: unset;
 }
 blockquote {
-	border-left: 4px solid var(--accent);
+	border-left: 4px solid rgb(var(--accent));
 	padding: 0 0 0 20px;
 	margin: 0px;
 	font-size: 1.333em;
@@ -127,6 +193,57 @@ hr {
 	border: none;
 	border-top: 1px solid rgb(var(--gray-light));
 }
+
+/* 卡片组件通用样式 */
+.card {
+	border-radius: 8px;
+	overflow: hidden;
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	background: white;
+	border: 1px solid rgb(var(--gray-light));
+}
+.card:hover {
+	transform: translateY(-5px);
+	box-shadow: var(--box-shadow);
+}
+
+/* 标签样式 */
+.tag {
+	display: inline-block;
+	padding: 0.3rem 0.8rem;
+	border-radius: 20px;
+	font-size: 0.9rem;
+	background-color: rgb(var(--accent-light));
+	color: rgb(var(--accent-dark));
+}
+
+/* 按钮样式 */
+.btn {
+	display: inline-block;
+	padding: 0.8rem 1.5rem;
+	border-radius: 4px;
+	font-weight: 600;
+	text-decoration: none;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+.btn-primary {
+	background-color: rgb(var(--accent));
+	color: white;
+}
+.btn-primary:hover {
+	background-color: rgb(var(--accent-dark));
+	color: white;
+}
+.btn-secondary {
+	background-color: transparent;
+	color: rgb(var(--accent));
+	border: 1px solid rgb(var(--accent));
+}
+.btn-secondary:hover {
+	background-color: rgba(var(--accent), 0.1);
+}
+
 @media (max-width: 720px) {
 	body {
 		font-size: 18px;
@@ -144,12 +261,8 @@ hr {
 	height: 1px;
 	width: 1px;
 	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
 	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
 	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
 	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }

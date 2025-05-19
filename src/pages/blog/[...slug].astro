@@ -14,8 +14,108 @@ type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
 const { Content } = await render(post);
+
+// 获取相关文章（同分类的其他文章，最多3篇）
+const allPosts = await getCollection('blog');
+const relatedPosts = allPosts
+  .filter(p => p.id !== post.id && 
+    p.data.category && post.data.category && 
+    p.data.category === post.data.category)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
 ---
 
 <BlogPost {...post.data}>
+	<div class="tags-container">
+		{post.data.category && <span class="category-badge">{post.data.category}</span>}
+		{post.data.tags && post.data.tags.map(tag => (
+			<span class="tag-badge">#{tag}</span>
+		))}
+	</div>
+	
 	<Content />
+	
+	{relatedPosts.length > 0 && (
+		<div class="related-posts">
+			<h2>相关文章</h2>
+			<div class="related-posts-grid">
+				{relatedPosts.map(relatedPost => (
+					<a class="related-post-card" href={`/blog/${relatedPost.id}/`}>
+						{relatedPost.data.heroImage && 
+							<img src={relatedPost.data.heroImage} alt={relatedPost.data.title} />
+						}
+						<h3>{relatedPost.data.title}</h3>
+					</a>
+				))}
+			</div>
+		</div>
+	)}
 </BlogPost>
+
+<style>
+	.tags-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 2rem;
+	}
+	
+	.category-badge {
+		background-color: rgb(var(--accent));
+		color: white;
+		padding: 0.3rem 0.8rem;
+		border-radius: 20px;
+		font-size: 0.9rem;
+	}
+	
+	.tag-badge {
+		background-color: rgb(var(--gray-light));
+		color: rgb(var(--gray-dark));
+		padding: 0.3rem 0.8rem;
+		border-radius: 20px;
+		font-size: 0.9rem;
+	}
+	
+	.related-posts {
+		margin-top: 4rem;
+		padding-top: 2rem;
+		border-top: 1px solid rgb(var(--gray-light));
+	}
+	
+	.related-posts h2 {
+		margin-bottom: 1.5rem;
+		font-size: 1.5rem;
+	}
+	
+	.related-posts-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+		gap: 1.5rem;
+	}
+	
+	.related-post-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		border-radius: 8px;
+		overflow: hidden;
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+	}
+	
+	.related-post-card:hover {
+		transform: translateY(-5px);
+		box-shadow: var(--box-shadow);
+	}
+	
+	.related-post-card img {
+		width: 100%;
+		height: 150px;
+		object-fit: cover;
+	}
+	
+	.related-post-card h3 {
+		padding: 1rem;
+		margin: 0;
+		font-size: 1.1rem;
+	}
+</style>

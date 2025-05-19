@@ -1,0 +1,162 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+
+const projects = await getCollection('projects');
+const sortedProjects = projects.sort((a, b) => {
+  // 首先按照featured排序，然后按照完成日期排序
+  if (a.data.featured && !b.data.featured) return -1;
+  if (!a.data.featured && b.data.featured) return 1;
+  return b.data.completed.valueOf() - a.data.completed.valueOf();
+});
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`项目 | ${SITE_TITLE}`} description="查看我的项目作品" />
+		<style>
+			main {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 2rem 1rem;
+			}
+			.page-title {
+				margin-bottom: 2rem;
+				text-align: center;
+			}
+			.projects-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+				gap: 2rem;
+			}
+			.project-card {
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+				transition: transform 0.3s ease, box-shadow 0.3s ease;
+				background: white;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+			}
+			.project-card:hover {
+				transform: translateY(-5px);
+				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+			}
+			.project-image {
+				height: 200px;
+				width: 100%;
+				object-fit: cover;
+			}
+			.project-content {
+				padding: 1.5rem;
+				flex-grow: 1;
+				display: flex;
+				flex-direction: column;
+			}
+			.project-title {
+				margin-top: 0;
+				margin-bottom: 0.5rem;
+				font-size: 1.5rem;
+			}
+			.project-description {
+				margin-bottom: 1.5rem;
+				color: rgb(var(--gray-dark));
+				flex-grow: 1;
+			}
+			.project-tech {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+				margin-bottom: 1rem;
+			}
+			.tech-tag {
+				background: rgb(var(--accent-light));
+				color: rgb(var(--accent-dark));
+				padding: 0.2rem 0.6rem;
+				border-radius: 4px;
+				font-size: 0.8rem;
+			}
+			.project-links {
+				display: flex;
+				gap: 1rem;
+				margin-top: auto;
+			}
+			.project-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.3rem;
+				text-decoration: none;
+				color: rgb(var(--accent));
+				font-weight: 500;
+			}
+			.project-link:hover {
+				text-decoration: underline;
+			}
+			.featured-badge {
+				position: absolute;
+				top: 1rem;
+				right: 1rem;
+				background: rgb(var(--accent));
+				color: white;
+				padding: 0.3rem 0.7rem;
+				border-radius: 4px;
+				font-size: 0.8rem;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1 class="page-title">我的项目作品</h1>
+			
+			<div class="projects-grid">
+				{sortedProjects.map((project) => (
+					<div class="project-card">
+						{project.data.featured && <span class="featured-badge">精选</span>}
+						
+						{project.data.image && 
+							<img class="project-image" src={project.data.image} alt={project.data.title} />
+						}
+						
+						<div class="project-content">
+							<h2 class="project-title">{project.data.title}</h2>
+							
+							<p class="project-description">{project.data.description}</p>
+							
+							{project.data.technologies && (
+								<div class="project-tech">
+									{project.data.technologies.map(tech => (
+										<span class="tech-tag">{tech}</span>
+									))}
+								</div>
+							)}
+							
+							<div class="project-links">
+								{project.data.url && (
+									<a href={project.data.url} target="_blank" rel="noopener noreferrer" class="project-link">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+										访问项目
+									</a>
+								)}
+								
+								{project.data.github && (
+									<a href={project.data.github} target="_blank" rel="noopener noreferrer" class="project-link">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+										GitHub
+									</a>
+								)}
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
